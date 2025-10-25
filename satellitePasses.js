@@ -5,6 +5,7 @@
 // Default fallback coordinates: Debrecen, Hungary (used if device location is unavailable)
 const FALLBACK_LATITUDE = 47.5316;
 const FALLBACK_LONGITUDE = 21.6273;
+const FALLBACK_LOCATION_NAME = "Debrecen, Hungary";
 
 // --- SATELLITE LIST ---
 const SATELLITES = [
@@ -165,7 +166,7 @@ function createWidget(passData) {
   
   widget.addSpacer();
   const coordStr = `${locMeta.lat.toFixed(4)}, ${locMeta.lon.toFixed(4)}`;
-  const footerLabel = locMeta.isFallback ? `📍🗺️ Debrecen (fallback) • ${coordStr}` : `📍🗺️ Device location • ${coordStr}`;
+  const footerLabel = locMeta.isFallback ? `📍🗺️ ${FALLBACK_LOCATION_NAME} • ${coordStr}` : `📍🗺️ Device location • ${coordStr}`;
   const footer = widget.addText(footerLabel);
   footer.font = Font.footnote();
   footer.textColor = Color.lightGray();

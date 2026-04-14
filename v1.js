@@ -299,7 +299,7 @@ function addHeader(widget) {
   widget.addSpacer(8);
 }
 
-function addPassCard(widget, pass, index) {
+function addPassCard(widget, pass, index, isLast = false) {
   const startTime = new Date(pass.start);
   const endTime = new Date(pass.end);
 
@@ -412,26 +412,23 @@ function createWidget(passes, locMeta) {
   addHeader(widget);
 
   if (!passes || passes.length === 0) {
+    widget.addSpacer();
     addEmptyState(widget);
     widget.addSpacer();
-    addFooter(widget, locMeta.placeName);
+    addFooter(widget, locMeta.placeName, passes);
     return widget;
   }
 
-  // Always reserve three visual card slots.
-  // Filled slots show satellite data, remaining slots show subtle placeholders.
-  for (let i = 0; i < MAX_PASSES_TO_SHOW; i++) {
-    if (i < passes.length) {
-      addPassCard(widget, passes[i], i);
-    } else {
-      addPlaceholderCard(widget);
-    }
-
-    if (i < MAX_PASSES_TO_SHOW - 1) widget.addSpacer(CARD_GAP);
+  // Keep the header pinned at the top and footer pinned at the bottom.
+  // The pass cards are centered within the remaining vertical space.
+  widget.addSpacer();
+  for (let i = 0; i < passes.length; i++) {
+    addPassCard(widget, passes[i], i, i === passes.length - 1);
   }
+  widget.addSpacer();
 
   widget.addSpacer();
-  addFooter(widget, locMeta.placeName);
+  addFooter(widget, locMeta.placeName, passes);
   return widget;
 }
 

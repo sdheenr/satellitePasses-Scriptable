@@ -179,9 +179,9 @@ function formatShortTime(dateObj) {
   return tf.string(dateObj);
 }
 
-function formatFooterDate(dateObj) {
+function formatFooterDateTime(dateObj) {
   const df = new DateFormatter();
-  df.dateFormat = "dd MMM";
+  df.dateFormat = "dd/MMM HH:mm";
   return df.string(dateObj);
 }
 
@@ -393,7 +393,7 @@ function addFooter(widget, placeName, passes) {
   footer.addSpacer(4);
   addText(footer, placeName, 10, new Color("#8A909C"));
   footer.addSpacer();
-  addText(footer, formatFooterDate(refDate), 10, new Color("#8A909C"));
+  addText(footer,`Updated • ${formatFooterDateTime(new Date())}`,10,new Color("#8A909C"));
 }
 
 function createWidget(passes, locMeta) {

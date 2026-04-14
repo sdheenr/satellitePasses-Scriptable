@@ -352,32 +352,37 @@ function addPassCard(widget, pass, index) {
 
   addInfoRow(card, "AOS / LOS Azimuth", `${aos}° / ${los}°`);
 
-  widget.addSpacer(7);
 }
 
-function addEmptyState(widget, placeName) {
-  const box = widget.addStack();
-  box.layoutVertically();
-  box.setPadding(16, 16, 16, 16);
-  box.backgroundColor = new Color("#121826");
-  box.cornerRadius = 16;
 
-  addText(box, "No upcoming passes", 14, Color.white(), true);
-  box.addSpacer(4);
-  addText(box, `No passes above ${MIN_ELEVATION}° in the next ${HOURS_AHEAD} hours.`, 10, new Color("#9CA3AF"));
+function addPlaceholderCard(widget) {
+  const card = widget.addStack();
+  card.layoutVertically();
+  card.setPadding(8, 12, 8, 12);
+  card.cornerRadius = 16;
+  card.backgroundColor = new Color("#121826", 0.45);
 
-  widget.addSpacer();
+  // Placeholder lines to indicate an unused slot.
+  const lines = [0.75, 0.55, 0.85, 0.6];
+  for (let i = 0; i < lines.length; i++) {
+    const row = card.addStack();
+    row.layoutHorizontally();
+    const line = row.addText("████████████████████████████");
+    line.font = Font.mediumSystemFont(8);
+    line.textColor = new Color("#94A3B8", 0.22 * lines[i]);
+    line.lineLimit = 1;
+    row.addSpacer();
+    card.addSpacer(i === lines.length - 1 ? 0 : 3);
+  }
+}
 
-  const now = new Date();
-  const footer = widget.addStack();
-  footer.layoutHorizontally();
-  footer.centerAlignContent();
+function addEmptyState(widget) {
+  const msg = widget.addStack();
+  msg.layoutVertically();
 
-  addText(footer, "📍", 10, new Color("#8A909C"));
-  footer.addSpacer(4);
-  addText(footer, placeName, 10, new Color("#8A909C"));
-  footer.addSpacer();
-  addText(footer, formatFooterDate(now), 10, new Color("#8A909C"));
+  addText(msg, "No upcoming passes", 13, Color.white(), true, 0.9);
+  msg.addSpacer(3);
+  addText(msg, `No passes above ${MIN_ELEVATION}° in next ${HOURS_AHEAD}h`, 10, new Color("#9CA3AF"));
 }
 
 function addFooter(widget, placeName, passes) {
@@ -387,7 +392,6 @@ function addFooter(widget, placeName, passes) {
   footer.layoutHorizontally();
   footer.centerAlignContent();
 
-  const refDate = passes && passes.length ? new Date(passes[0].start) : new Date();
 
   addText(footer, "📍", 10, new Color("#8A909C"));
   footer.addSpacer(4);
@@ -404,14 +408,25 @@ function createWidget(passes, locMeta) {
   addHeader(widget);
 
   if (!passes || passes.length === 0) {
-    addEmptyState(widget, locMeta.placeName);
+    addEmptyState(widget);
+    widget.addSpacer();
+    addFooter(widget, locMeta.placeName, passes);
     return widget;
   }
 
-  for (let i = 0; i < passes.length; i++) {
-    addPassCard(widget, passes[i], i);
+  // Always reserve three visual card slots.
+  // Filled slots show satellite data, remaining slots show subtle placeholders.
+  for (let i = 0; i < MAX_PASSES_TO_SHOW; i++) {
+    if (i < passes.length) {
+      addPassCard(widget, passes[i], i);
+    } else {
+      addPlaceholderCard(widget);
+    }
+
+    if (i < MAX_PASSES_TO_SHOW - 1) widget.addSpacer(7);
   }
 
+  widget.addSpacer();
   addFooter(widget, locMeta.placeName, passes);
   return widget;
 }

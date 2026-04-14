@@ -38,23 +38,100 @@ const SATELLITES = [
 function shortCountryName(country) {
   if (!country) return "";
 
-  const map = {
-    "United Arab Emirates": "UAE",
-    "India": "IND",
-    "Saudi Arabia": "KSA",
-    "Sri Lanka": "SL",
-    "United States": "USA",
-    "United Kingdom": "UK",
-    "Qatar": "QAT",
-    "Oman": "OMN",
-    "Kuwait": "KWT",
-    "Bahrain": "BHR",
-    "China": "CHN",
-    "Japan": "JPN",
-    "Pakistan": "PAK",
-    "Bangladesh": "BGD",
-    "Nepal": "NPL"
-  };
+const map = {
+  // Middle East
+  "United Arab Emirates": "UAE",
+  "Saudi Arabia": "KSA",
+  "Qatar": "QAT",
+  "Oman": "OMN",
+  "Kuwait": "KWT",
+  "Bahrain": "BHR",
+  "Jordan": "JOR",
+  "Israel": "ISR",
+  "Lebanon": "LBN",
+
+  // South Asia
+  "India": "IND",
+  "Pakistan": "PAK",
+  "Bangladesh": "BGD",
+  "Sri Lanka": "SL",
+  "Nepal": "NPL",
+  "Bhutan": "BTN",
+  "Maldives": "MDV",
+
+  // East Asia
+  "China": "CHN",
+  "Japan": "JPN",
+  "South Korea": "KOR",
+  "North Korea": "PRK",
+  "Taiwan": "TWN",
+  "Hong Kong": "HKG",
+  "Macao": "MAC",
+
+  // Southeast Asia
+  "Singapore": "SGP",
+  "Malaysia": "MYS",
+  "Indonesia": "IDN",
+  "Thailand": "THA",
+  "Vietnam": "VNM",
+  "Philippines": "PHL",
+  "Myanmar": "MMR",
+  "Cambodia": "KHM",
+  "Laos": "LAO",
+  "Brunei": "BRN",
+
+  // Europe
+  "United Kingdom": "UK",
+  "Ireland": "IRL",
+  "France": "FRA",
+  "Germany": "DEU",
+  "Italy": "ITA",
+  "Spain": "ESP",
+  "Portugal": "PRT",
+  "Netherlands": "NLD",
+  "Belgium": "BEL",
+  "Switzerland": "CHE",
+  "Austria": "AUT",
+  "Sweden": "SWE",
+  "Norway": "NOR",
+  "Denmark": "DNK",
+  "Finland": "FIN",
+  "Poland": "POL",
+  "Czechia": "CZE",
+  "Hungary": "HUN",
+  "Greece": "GRC",
+  "Turkey": "TUR",
+  "Ukraine": "UKR",
+  "Romania": "ROU",
+
+  // Americas
+  "United States": "USA",
+  "Canada": "CAN",
+  "Mexico": "MEX",
+  "Brazil": "BRA",
+  "Argentina": "ARG",
+  "Chile": "CHL",
+  "Colombia": "COL",
+  "Peru": "PER",
+  "Venezuela": "VEN",
+
+  // Africa
+  "South Africa": "ZAF",
+  "Egypt": "EGY",
+  "Nigeria": "NGA",
+  "Kenya": "KEN",
+  "Morocco": "MAR",
+  "Algeria": "DZA",
+  "Ethiopia": "ETH",
+  "Ghana": "GHA",
+  "Tanzania": "TZA",
+
+  // Oceania
+  "Australia": "AUS",
+  "New Zealand": "NZL",
+  "Fiji": "FJI",
+  "Papua New Guinea": "PNG"
+};
 
   return map[country] || country;
 }

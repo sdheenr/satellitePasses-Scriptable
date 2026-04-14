@@ -415,20 +415,28 @@ function createWidget(passes, locMeta) {
     widget.addSpacer();
     addEmptyState(widget);
     widget.addSpacer();
-    addFooter(widget, locMeta.placeName, passes);
+    addFooter(widget, locMeta.placeName);
     return widget;
   }
 
-  // Keep the header pinned at the top and footer pinned at the bottom.
-  // The pass cards are centered within the remaining vertical space.
-  widget.addSpacer();
-  for (let i = 0; i < passes.length; i++) {
-    addPassCard(widget, passes[i], i, i === passes.length - 1);
+  // ✅ NO spacer before cards → keeps top aligned
+  for (let i = 0; i < MAX_PASSES_TO_SHOW; i++) {
+    if (i < passes.length) {
+      addPassCard(widget, passes[i], i);
+    } else {
+      addPlaceholderCard(widget);
+    }
+
+    if (i < MAX_PASSES_TO_SHOW - 1) {
+      widget.addSpacer(CARD_GAP);
+    }
   }
+
+  // ✅ This pushes footer to bottom
   widget.addSpacer();
 
-  widget.addSpacer();
-  addFooter(widget, locMeta.placeName, passes);
+  addFooter(widget, locMeta.placeName);
+
   return widget;
 }
 

@@ -297,7 +297,7 @@ function addHeader(widget) {
   widget.addSpacer(8);
 }
 
-function addPassCard(widget, pass, index) {
+function addPassCard(widget, pass, index, isLast = false) {
   const startTime = new Date(pass.start);
   const endTime = new Date(pass.end);
 
@@ -352,10 +352,10 @@ function addPassCard(widget, pass, index) {
 
   addInfoRow(card, "AOS / LOS Azimuth", `${aos}° / ${los}°`);
 
-  widget.addSpacer(7);
+  if (!isLast) widget.addSpacer(7);
 }
 
-function addEmptyState(widget, placeName) {
+function addEmptyState(widget) {
   const box = widget.addStack();
   box.layoutVertically();
   box.setPadding(16, 16, 16, 16);
@@ -365,19 +365,6 @@ function addEmptyState(widget, placeName) {
   addText(box, "No upcoming passes", 14, Color.white(), true);
   box.addSpacer(4);
   addText(box, `No passes above ${MIN_ELEVATION}° in the next ${HOURS_AHEAD} hours.`, 10, new Color("#9CA3AF"));
-
-  widget.addSpacer();
-
-  const now = new Date();
-  const footer = widget.addStack();
-  footer.layoutHorizontally();
-  footer.centerAlignContent();
-
-  addText(footer, "📍", 10, new Color("#8A909C"));
-  footer.addSpacer(4);
-  addText(footer, placeName, 10, new Color("#8A909C"));
-  footer.addSpacer();
-  addText(footer, formatFooterDate(now), 10, new Color("#8A909C"));
 }
 
 function addFooter(widget, placeName, passes) {
@@ -387,7 +374,6 @@ function addFooter(widget, placeName, passes) {
   footer.layoutHorizontally();
   footer.centerAlignContent();
 
-  const refDate = passes && passes.length ? new Date(passes[0].start) : new Date();
 
   addText(footer, "📍", 10, new Color("#8A909C"));
   footer.addSpacer(4);
@@ -404,13 +390,20 @@ function createWidget(passes, locMeta) {
   addHeader(widget);
 
   if (!passes || passes.length === 0) {
-    addEmptyState(widget, locMeta.placeName);
+    widget.addSpacer();
+    addEmptyState(widget);
+    widget.addSpacer();
+    addFooter(widget, locMeta.placeName, passes);
     return widget;
   }
 
+  // Keep the header pinned at the top and footer pinned at the bottom.
+  // The pass cards are centered within the remaining vertical space.
+  widget.addSpacer();
   for (let i = 0; i < passes.length; i++) {
-    addPassCard(widget, passes[i], i);
+    addPassCard(widget, passes[i], i, i === passes.length - 1);
   }
+  widget.addSpacer();
 
   addFooter(widget, locMeta.placeName, passes);
   return widget;

@@ -1,12 +1,12 @@
-// Satellite Passes - Apple Style Medium Widget for Scriptable
-// Medium widget only, 3 pass cards, city + short country footer
+// Satellite Passes - Large Widget Pro for Scriptable
+// 3 passes, detailed cards, Apple-style, city + short country
 
 // ---------------- CONFIG ----------------
 const FALLBACK_LATITUDE = 25.2048;
 const FALLBACK_LONGITUDE = 55.2708;
 const FALLBACK_LOCATION_NAME = "Dubai, UAE";
 
-const MIN_ELEVATION = 40;
+const MIN_ELEVATION = 30;
 const HOURS_AHEAD = 24;
 const MAX_PASSES_TO_SHOW = 3;
 
@@ -65,7 +65,8 @@ function getSatelliteIcon(name) {
   if (name.includes("NOAA") || name.includes("METEOR")) return "🌦";
   if (name.includes("Hubble")) return "🔭";
   if (name.includes("Tiangong")) return "🚀";
-  return "📡";
+  if (name.includes("AO-") || name.includes("SO-") || name.includes("JO-") || name.includes("FO-")) return "📡";
+  return "🛰";
 }
 
 function minutesUntil(date) {
@@ -80,7 +81,6 @@ function formatPlaceName(geo) {
   if (!geo || geo.length === 0) return FALLBACK_LOCATION_NAME;
 
   const g = geo[0];
-
   const city =
     g.postalAddressCity ||
     g.city ||
@@ -95,8 +95,22 @@ function formatPlaceName(geo) {
   return country ? `${city}, ${country}` : city;
 }
 
+function formatShortTime(dateObj) {
+  const tf = new DateFormatter();
+  tf.useNoDateStyle();
+  tf.useShortTimeStyle();
+  return tf.string(dateObj);
+}
+
+function formatMediumDate(dateObj) {
+  const df = new DateFormatter();
+  df.useMediumDateStyle();
+  df.useNoTimeStyle();
+  return df.string(dateObj);
+}
+
 function addText(stack, text, size, color, bold = false, opacity = 1) {
-  const t = stack.addText(text);
+  const t = stack.addText(String(text));
   t.font = bold ? Font.boldSystemFont(size) : Font.systemFont(size);
   t.textColor = color;
   t.textOpacity = opacity;
@@ -104,16 +118,22 @@ function addText(stack, text, size, color, bold = false, opacity = 1) {
   return t;
 }
 
-function addSpacerLine(widget, h = 6) {
-  const s = widget.addStack();
-  s.size = new Size(0, h);
-}
+function addInfoRow(parent, label, value, valueColor = Color.white(), highlight = false) {
+  const row = parent.addStack();
+  row.layoutHorizontally();
+  row.centerAlignContent();
 
-function formatTimeRange(startTime, endTime) {
-  const tf = new DateFormatter();
-  tf.useNoDateStyle();
-  tf.useShortTimeStyle();
-  return `${tf.string(startTime)}–${tf.string(endTime)}`;
+  const l = row.addText(label);
+  l.font = Font.systemFont(11);
+  l.textColor = new Color("#A1A6B0");
+  l.lineLimit = 1;
+
+  row.addSpacer();
+
+  const v = row.addText(String(value));
+  v.font = highlight ? Font.boldSystemFont(11) : Font.mediumSystemFont(11);
+  v.textColor = valueColor;
+  v.lineLimit = 1;
 }
 
 // ---------------- API ----------------
@@ -182,8 +202,8 @@ function applyBackground(widget) {
   const gradient = new LinearGradient();
   gradient.locations = [0, 1];
   gradient.colors = [
-    new Color("#0F1115"),
-    new Color("#171A20")
+    new Color("#0C0F14"),
+    new Color("#131923")
   ];
   widget.backgroundGradient = gradient;
 }
@@ -193,88 +213,90 @@ function addHeader(widget, placeName) {
   top.layoutHorizontally();
   top.centerAlignContent();
 
-  addText(top, "Satellite Passes", 16, Color.white(), true);
+  addText(top, "Satellite Passes", 17, Color.white(), true);
   top.addSpacer();
-  addText(top, placeName, 11, new Color("#A1A6B0"), false, 0.95);
+  addText(top, placeName, 11, new Color("#9FA6B2"), false, 0.95);
 
-  addSpacerLine(widget, 10);
+  widget.addSpacer(10);
 }
 
-function addPassCard(widget, pass, isPrimary = false) {
+function addPassCard(widget, pass, index) {
   const startTime = new Date(pass.start);
   const endTime = new Date(pass.end);
-  const minsAway = minutesUntil(startTime);
+
   const duration = formatDurationMinutes(startTime, endTime);
+  const minsAway = minutesUntil(startTime);
   const elevation = Math.round(Number(pass.max_elevation) || 0);
+  const aos = Math.round(Number(pass.aos_azimuth) || 0);
+  const los = Math.round(Number(pass.los_azimuth) || 0);
 
   const card = widget.addStack();
   card.layoutVertically();
   card.setPadding(10, 12, 10, 12);
   card.cornerRadius = 16;
-  card.backgroundColor = isPrimary
-    ? new Color("#1E2633")
-    : new Color("#1A1D24");
+  card.backgroundColor = index === 0 ? new Color("#1A2333") : new Color("#171C26");
 
-  const row1 = card.addStack();
-  row1.layoutHorizontally();
-  row1.centerAlignContent();
+  // Top row
+  const topRow = card.addStack();
+  topRow.layoutHorizontally();
+  topRow.centerAlignContent();
 
   addText(
-    row1,
+    topRow,
     `${getSatelliteIcon(pass.satellite_name)} ${pass.satellite_name}`,
-    isPrimary ? 13 : 12,
+    13,
     Color.white(),
     true
   );
 
-  row1.addSpacer();
+  topRow.addSpacer();
 
   addText(
-    row1,
+    topRow,
     `${minsAway}m`,
-    12,
-    new Color(isPrimary ? "#5AC8FA" : "#8ECAE6"),
+    13,
+    new Color(index === 0 ? "#5AC8FA" : "#8BC9FF"),
     true
   );
 
-  card.addSpacer(5);
+  card.addSpacer(7);
 
-  const row2 = card.addStack();
-  row2.layoutHorizontally();
-  row2.centerAlignContent();
-
-  addText(row2, formatTimeRange(startTime, endTime), 11, new Color("#D1D5DB"));
-  row2.addSpacer();
-  addText(row2, `${duration} min`, 11, new Color("#9CA3AF"));
-
+  addInfoRow(card, "NORAD ID", pass.norad_id);
   card.addSpacer(3);
 
-  const row3 = card.addStack();
-  row3.layoutHorizontally();
-  row3.centerAlignContent();
+  addInfoRow(card, "Date", formatMediumDate(startTime));
+  card.addSpacer(3);
 
-  addText(row3, `Max ${elevation}°`, 10, new Color("#9CA3AF"));
-  row3.addSpacer();
-  addText(row3, `NORAD ${pass.norad_id}`, 10, new Color("#7F8694"));
+  addInfoRow(
+    card,
+    "Start - End - Duration",
+    `${formatShortTime(startTime)} - ${formatShortTime(endTime)} - ${duration} min`
+  );
+  card.addSpacer(3);
 
-  addSpacerLine(widget, 8);
+  addInfoRow(card, "Max Elevation", `${elevation}°`);
+  card.addSpacer(3);
+
+  addInfoRow(card, "AOS / LOS Azimuth", `${aos}° / ${los}°`);
+
+  widget.addSpacer(8);
 }
 
 function addEmptyState(widget, placeName) {
   const box = widget.addStack();
   box.layoutVertically();
-  box.setPadding(14, 14, 14, 14);
-  box.backgroundColor = new Color("#1A1D24");
+  box.setPadding(16, 16, 16, 16);
+  box.backgroundColor = new Color("#171C26");
   box.cornerRadius = 16;
 
-  addText(box, "No upcoming passes", 14, Color.white(), true);
+  addText(box, "No upcoming passes", 15, Color.white(), true);
   box.addSpacer(4);
   addText(box, `No passes above ${MIN_ELEVATION}° in the next ${HOURS_AHEAD} hours.`, 11, new Color("#A1A6B0"));
 
   widget.addSpacer();
   const footer = widget.addText(`📍 ${placeName}`);
   footer.font = Font.systemFont(11);
-  footer.textColor = new Color("#A1A6B0");
+  footer.textColor = new Color("#9FA6B2");
 }
 
 function addFooter(widget, placeName) {
@@ -284,16 +306,16 @@ function addFooter(widget, placeName) {
   footer.layoutHorizontally();
   footer.centerAlignContent();
 
-  addText(footer, "📍", 10, new Color("#8A909C"));
+  addText(footer, "📍", 11, new Color("#8A909C"));
   footer.addSpacer(4);
-  addText(footer, placeName, 10, new Color("#8A909C"));
+  addText(footer, placeName, 11, new Color("#8A909C"));
 
   footer.addSpacer();
 
-  const df = new DateFormatter();
-  df.useNoDateStyle();
-  df.useShortTimeStyle();
-  addText(footer, df.string(new Date()), 10, new Color("#6B7280"));
+  const tf = new DateFormatter();
+  tf.useNoDateStyle();
+  tf.useShortTimeStyle();
+  addText(footer, `Updated ${tf.string(new Date())}`, 10, new Color("#6F7785"));
 }
 
 function createWidget(passes, locMeta) {
@@ -309,7 +331,7 @@ function createWidget(passes, locMeta) {
   }
 
   for (let i = 0; i < passes.length; i++) {
-    addPassCard(widget, passes[i], i === 0);
+    addPassCard(widget, passes[i], i);
   }
 
   addFooter(widget, locMeta.placeName);
@@ -325,7 +347,7 @@ async function main() {
   if (config.runsInWidget) {
     Script.setWidget(widget);
   } else {
-    await widget.presentMedium();
+    await widget.presentLarge();
   }
 
   Script.complete();

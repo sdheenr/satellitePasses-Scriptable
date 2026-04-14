@@ -405,6 +405,7 @@ function createWidget(passes, locMeta) {
   }
   widget.addSpacer();
 
+  widget.addSpacer();
   addFooter(widget, locMeta.placeName, passes);
   return widget;
 }

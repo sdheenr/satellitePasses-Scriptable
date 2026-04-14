@@ -9,6 +9,8 @@ const FALLBACK_LOCATION_NAME = "Dubai, UAE";
 const MIN_ELEVATION = 30;
 const HOURS_AHEAD = 24;
 const MAX_PASSES_TO_SHOW = 3;
+const CARD_GAP = 7;
+const CARD_HEIGHT = 86;
 
 // ---------------- SATELLITES ----------------
 const SATELLITES = [
@@ -311,6 +313,7 @@ function addPassCard(widget, pass, index, isLast = false) {
   card.layoutVertically();
   card.setPadding(8, 12, 8, 12);
   card.cornerRadius = 16;
+  card.size = new Size(0, CARD_HEIGHT);
   card.backgroundColor = index === 0 ? new Color("#16233A") : new Color("#121826");
 
   const topRow = card.addStack();
@@ -352,22 +355,41 @@ function addPassCard(widget, pass, index, isLast = false) {
 
   addInfoRow(card, "AOS / LOS Azimuth", `${aos}° / ${los}°`);
 
-  if (!isLast) widget.addSpacer(7);
+}
+
+
+function addPlaceholderCard(widget) {
+  const card = widget.addStack();
+  card.layoutVertically();
+  card.setPadding(8, 12, 8, 12);
+  card.cornerRadius = 16;
+  card.size = new Size(0, CARD_HEIGHT);
+  card.backgroundColor = new Color("#121826", 0.45);
+
+  // Placeholder lines to indicate an unused slot.
+  const lines = [0.75, 0.55, 0.85, 0.6];
+  for (let i = 0; i < lines.length; i++) {
+    const row = card.addStack();
+    row.layoutHorizontally();
+    const line = row.addText("████████████████████████████");
+    line.font = Font.mediumSystemFont(8);
+    line.textColor = new Color("#94A3B8", 0.22 * lines[i]);
+    line.lineLimit = 1;
+    row.addSpacer();
+    card.addSpacer(i === lines.length - 1 ? 0 : 3);
+  }
 }
 
 function addEmptyState(widget) {
-  const box = widget.addStack();
-  box.layoutVertically();
-  box.setPadding(16, 16, 16, 16);
-  box.backgroundColor = new Color("#121826");
-  box.cornerRadius = 16;
+  const msg = widget.addStack();
+  msg.layoutVertically();
 
-  addText(box, "No upcoming passes", 14, Color.white(), true);
-  box.addSpacer(4);
-  addText(box, `No passes above ${MIN_ELEVATION}° in the next ${HOURS_AHEAD} hours.`, 10, new Color("#9CA3AF"));
+  addText(msg, "No upcoming passes", 13, Color.white(), true, 0.9);
+  msg.addSpacer(3);
+  addText(msg, `No passes above ${MIN_ELEVATION}° in next ${HOURS_AHEAD}h`, 10, new Color("#9CA3AF"));
 }
 
-function addFooter(widget, placeName, passes) {
+function addFooter(widget, placeName) {
   widget.addSpacer(2);
 
   const footer = widget.addStack();
